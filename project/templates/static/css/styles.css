@@ -1,0 +1,24 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+div {
+    margin-bottom: 20px;
+}
+
+label {
+    margin-right: 10px;
+}
+
+button {
+    margin-left: 10px;
+}

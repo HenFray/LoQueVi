@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contenido</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <div>
+        <label for="filter-tipo">Tipo:</label>
+        <select id="filter-tipo">
+            <option value="">-- Selecciona --</option>
+            <option value="Anime">Anime</option>
+            <option value="Libro">Libro</option>
+            <option value="Pelicula">Pelicula</option>
+            <option value="Serie">Serie</option>
+        </select>
+        <label for="filter-plataforma">Plataforma:</label>
+        <select id="filter-plataforma">
+            <option value="">-- Selecciona --</option>
+            <option value="Prime Video">Prime Video</option>
+            <option value="HBOMAX">HBOMAX</option>
+            <option value="Crunchy Roll">Crunchy Roll</option>
+            <option value="Netflix">Netflix</option>
+            <option value="Ilegal">Ilegal</option>
+            <option value="Flow">Flow</option>
+            <option value="Cine.ar">Cine.ar</option>
+        </select>
+        <button id="apply-filters">Aplicar Filtros</button>
+    </div>
+    <table id="contenido-table" class="display">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Tipo</th>
+                <th>Año</th>
+                <th>Plataforma</th>
+                <th>Comentario</th>
+                <th>Puntuacion</th>
+                <th>Vista</th>
+                <th>AñoDeVisualisacion</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.ID }}</td>
+                <td>{{ row.Nombre }}</td>
+                <td>{{ row.Tipo }}</td>
+                <td>{{ row.Año }}</td>
+                <td>{{ row.Plataforma }}</td>
+                <td>{{ row.Comentario }}</td>
+                <td>{{ row.Puntuacion }}</td>
+                <td>{{ row.Vista }}</td>
+                <td>{{ row.AñoDeVisualisacion }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        $(document).ready(function() {
+            var table = $('#contenido-table').DataTable();
+
+            $('#apply-filters').click(function() {
+                var tipo = $('#filter-tipo').val();
+                var plataforma = $('#filter-plataforma').val();
+
+                var filters = {
+                    Tipo: tipo,
+                    Plataforma: plataforma
+                };
+
+                $.ajax({
+                    url: '/filter',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(filters),
+                    success: function(data) {
+                        table.clear().rows.add(data).draw();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
