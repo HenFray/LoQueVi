@@ -155,7 +155,16 @@
                     { data: 'Plataforma' },
                     { data: 'Comentario' },
                     { data: 'Puntuacion' },
-                    { data: 'Vista' },
+                    { 
+                        data: 'Vista',
+                        render: function(data, type, row) {
+                            if (data === 1) {
+                                return '<span title="Visto">&#x1F441;</span>'; // Emoji de ojo
+                            } else {
+                                return '<span title="No visto">&#x274C;</span>'; // Cruz roja o similar
+                            }
+                        }
+                    },
                     { data: 'AñoDeVisualisacion' }
                 ]
             });
