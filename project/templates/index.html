@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contenido</title>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 </head>
@@ -35,7 +34,6 @@
     <table id="contenido-table" class="display">
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Nombre</th>
                 <th>Tipo</th>
                 <th>Año</th>
@@ -47,24 +45,31 @@
             </tr>
         </thead>
         <tbody>
-            {% for row in rows %}
-            <tr>
-                <td>{{ row.ID }}</td>
-                <td>{{ row.Nombre }}</td>
-                <td>{{ row.Tipo }}</td>
-                <td>{{ row.Año }}</td>
-                <td>{{ row.Plataforma }}</td>
-                <td>{{ row.Comentario }}</td>
-                <td>{{ row.Puntuacion }}</td>
-                <td>{{ row.Vista }}</td>
-                <td>{{ row.AñoDeVisualisacion }}</td>
-            </tr>
-            {% endfor %}
         </tbody>
     </table>
     <script>
         $(document).ready(function() {
-            var table = $('#contenido-table').DataTable();
+            var table = $('#contenido-table').DataTable({
+                ajax: {
+                    url: '/filter',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: function(d) {
+                        return JSON.stringify({}); // Enviar filtro vacío para cargar todos los datos por defecto
+                    },
+                    dataSrc: ''
+                },
+                columns: [
+                    { data: 'Nombre' },
+                    { data: 'Tipo' },
+                    { data: 'Año' },
+                    { data: 'Plataforma' },
+                    { data: 'Comentario' },
+                    { data: 'Puntuacion' },
+                    { data: 'Vista' },
+                    { data: 'AñoDeVisualisacion' }
+                ]
+            });
 
             $('#apply-filters').click(function() {
                 var tipo = $('#filter-tipo').val();
@@ -81,7 +86,11 @@
                     contentType: 'application/json',
                     data: JSON.stringify(filters),
                     success: function(data) {
+                        // Limpiar tabla y agregar datos filtrados
                         table.clear().rows.add(data).draw();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error en la solicitud AJAX:', status, error);
                     }
                 });
             });

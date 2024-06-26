@@ -3,22 +3,17 @@ import sqlite3
 
 app = Flask(__name__)
 
+# Función para establecer conexión a la base de datos SQLite
 def get_db_connection():
     conn = sqlite3.connect('loquevi.db')
-    conn.row_factory = sqlite3.Row
+    conn.row_factory = sqlite3.Row  # Para devolver filas como diccionarios
     return conn
 
-@app.route('/')
-def index():
-    conn = get_db_connection()
-    rows = conn.execute('SELECT * FROM contenido').fetchall()
-    conn.close()
-    return render_template('index.html', rows=rows)
-
+# Ruta para filtrar datos basado en los parámetros recibidos
 @app.route('/filter', methods=['POST'])
 def filter_data():
     filters = request.json
-    query = 'SELECT * FROM contenido WHERE 1=1'
+    query = 'SELECT Nombre, Tipo, Año, Plataforma, Comentario, Puntuacion, Vista, AñoDeVisualisacion FROM contenido WHERE 1=1'
     params = []
 
     if filters.get('Tipo'):
@@ -30,11 +25,30 @@ def filter_data():
         params.append(filters['Plataforma'])
 
     conn = get_db_connection()
-    rows = conn.execute(query, params).fetchall()
+    cursor = conn.execute(query, params)
+    rows = cursor.fetchall()
     conn.close()
 
-    data = [dict(row) for row in rows]
+    # Convertir resultados a formato JSON
+    data = []
+    for row in rows:
+        data.append({
+            'Nombre': row['Nombre'],
+            'Tipo': row['Tipo'],
+            'Año': row['Año'],
+            'Plataforma': row['Plataforma'],
+            'Comentario': row['Comentario'],
+            'Puntuacion': row['Puntuacion'],
+            'Vista': row['Vista'],
+            'AñoDeVisualisacion': row['AñoDeVisualisacion']
+        })
+
     return jsonify(data)
+
+# Ruta principal para renderizar la página HTML
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
