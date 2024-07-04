@@ -546,27 +546,14 @@
             });
 
             // Apply filter button click handler
-            $('#apply-filters').on('click', function() {
-                // Get filter data from form fields
-                const filterData = {
-                    tipo: $("#tipoFilter").val(),
-                    plataforma: $("#plataformaFilter").val()
-                };
+            document.getElementById('apply-filters').addEventListener('click', function() {
+                const tipo = document.getElementById('filter-tipo').value;
+                const plataforma = document.getElementById('filter-plataforma').value;
 
-                // Send POST request to filter_data route with filter data
-                $.ajax({
-                    url: "/filter_data",
-                    type: "POST",
-                    contentType: 'application/json',  // Added line to set content type
-                    data: JSON.stringify(filterData),
-                    success: function(response) {
-                        // Update content table with filtered data
-                        table.ajax.reload(null, false);
-                    },
-                    error: function(error) {
-                        console.error("Error filtering data:", error);
-                    }
-                });
+                let filteredData = table
+                    .column(1).search(tipo ? '^' + tipo + '$' : '', true, false)
+                    .column(3).search(plataforma ? '^' + plataforma + '$' : '', true, false)
+                    .draw();
             });
 
             // Modal handling
