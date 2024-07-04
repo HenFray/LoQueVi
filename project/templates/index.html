@@ -644,17 +644,27 @@
             });
 
             // Delete button
-            $('#contenido-table tbody').on('click', '.delete-button', function() {
+            $('#contenido-table tbody').on('click', 'button.delete-button', function() {
                 const data = table.row($(this).parents('tr')).data();
-                $.ajax({
-                    url: '/delete_contenido',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ id: data.id }),
-                    success: function(response) {
-                        table.ajax.reload();
-                    }
-                });
+                if (confirm(`¿Estás seguro de que deseas eliminar el contenido "${data.Nombre}"?`)) {
+                    fetch('/delete_contenido', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ Nombre: data.Nombre })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.status === 'success') {
+                            alert('Contenido eliminado con éxito');
+                            table.ajax.reload();
+                        } else {
+                            alert('Error al eliminar el contenido');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
             });
 
             function clearForm() {
