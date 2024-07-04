@@ -1,51 +1,123 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, g
 import sqlite3
 
 app = Flask(__name__)
 
-# Función para establecer conexión a la base de datos SQLite
+DATABASE = 'loquevi.db'
+
 def get_db_connection():
-    conn = sqlite3.connect('loquevi.db')
-    conn.row_factory = sqlite3.Row  # Para devolver filas como diccionarios
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
     return conn
 
-# Ruta para filtrar datos basado en los parámetros recibidos
-@app.route('/filter', methods=['POST'])
+@app.before_request
+def before_request():
+    g.db = get_db_connection()
+
+@app.teardown_request
+def teardown_request(exception):
+    db = getattr(g, 'db', None)
+    if db is not None:
+        db.close()
+
+@app.route('/get_contenido', methods=['GET'])
+def get_contenido():
+    cursor = g.db.execute('SELECT rowid as id, * FROM contenido')
+    contenido = cursor.fetchall()
+    return jsonify([dict(row) for row in contenido])
+
+@app.route('/add_contenido', methods=['POST'])
+def add_contenido():
+    data = request.get_json()
+
+    try:
+        año = data['año']
+    except KeyError:
+        año = None  # Asigna un valor por defecto
+        # O muestra un mensaje de error al usuario
+
+    query = '''INSERT INTO contenido 
+                (Nombre, Tipo, Año, Plataforma, Comentario, Puntuacion, Vista, AñoDeVisualisacion) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)'''
+    params = (
+        data['nombre'],
+        data['tipo'],
+        data['año'],
+        data['plataforma'],
+        data['comentario'],
+        data['puntuacion'],
+        data['vista'],
+        data['añovisualizacion']
+    )
+
+    g.db.execute(query, params)
+    g.db.commit()
+
+    return jsonify({'status': 'success'})
+
+
+@app.route('/update_contenido', methods=['POST'])
+def update_contenido():
+    data = request.get_json()
+    # Assuming 'Nombre' is a unique field for each content
+    query = '''UPDATE contenido SET 
+                Nombre = ?, Tipo = ?, Año = ?, Plataforma = ?, Comentario = ?, Puntuacion = ?, Vista = ?, AñoDeVisualisacion = ? 
+                WHERE Nombre = ?'''
+    params = (
+        data['nombre'],
+        data['tipo'],
+        data['año'],
+        data['plataforma'],
+        data['comentario'],
+        data['puntuacion'],
+        data['vista'],
+        data['añovisualizacion'],
+        data['nombre']  # Use 'nombre' here to match against the unique 'Nombre' field
+    )
+    g.db.execute(query, params)
+    g.db.commit()
+    return jsonify({'status': 'success'})
+
+
+@app.route('/delete_contenido', methods=['POST'])
+def delete_contenido():
+  data = request.get_json()
+  # Assuming 'Nombre' is a unique field for each content
+  query = 'DELETE FROM contenido WHERE Nombre = ?'
+  g.db.execute(query, (data['Nombre'],))
+  g.db.commit()
+  return jsonify({'status': 'success'})
+
+
+@app.route('/filter_data', methods=['POST'])
 def filter_data():
-    filters = request.json
-    query = 'SELECT Nombre, Tipo, Año, Plataforma, Comentario, Puntuacion, Vista, AñoDeVisualisacion FROM contenido WHERE 1=1'
-    params = []
+  data = request.get_json()
+  # Assuming filters are applied based on a combination of Tipo and Plataforma
+  query_base = "SELECT Nombre, Tipo, Año, Plataforma, Comentario, Puntuacion, Vista, AñoDeVisualisacion FROM contenido"
+  query_filters = ""
+  params = []
 
-    if filters.get('Tipo'):
-        query += ' AND Tipo = ?'
-        params.append(filters['Tipo'])
-    
-    if filters.get('Plataforma'):
-        query += ' AND Plataforma = ?'
-        params.append(filters['Plataforma'])
+  if data.get('Tipo'):
+    query_filters += " WHERE Tipo = ?"
+    params.append(data['Tipo'])
 
-    conn = get_db_connection()
-    cursor = conn.execute(query, params)
-    rows = cursor.fetchall()
-    conn.close()
+  if data.get('Plataforma'):
+    if query_filters:  # Add AND only if there's already a filter
+      query_filters += " AND"
+    query_filters += " Plataforma = ?"
+    params.append(data['Plataforma'])
 
-    # Convertir resultados a formato JSON
-    data = []
-    for row in rows:
-        data.append({
-            'Nombre': row['Nombre'],
-            'Tipo': row['Tipo'],
-            'Año': row['Año'],
-            'Plataforma': row['Plataforma'],
-            'Comentario': row['Comentario'],
-            'Puntuacion': row['Puntuacion'],
-            'Vista': row['Vista'],
-            'AñoDeVisualisacion': row['AñoDeVisualisacion']
-        })
+  # Combine base query with optional filters
+  query = query_base + query_filters
 
-    return jsonify(data)
+  cursor = g.db.execute(query, params)
+  rows = cursor.fetchall()
 
-# Ruta principal para renderizar la página HTML
+  # Transform rows to dictionaries (without relying on 'id')
+  results = [dict(row) for row in rows]
+  return jsonify(results)
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
