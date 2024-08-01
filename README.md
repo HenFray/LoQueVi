@@ -3,11 +3,11 @@
 pip install -r requirements.txt
 ```
 # Usage
-con el venv activado te dirigis al directorio LOQUEVI\proyect y ejecutas
+With venv activated you go to the LOQUEVI\proyect directory and execute
 ```bash
 python app.py
 ```
-la consola les mostrara la direccion donde estara la pagina 
+The console will show you the address where the page will be
 
 ```bash
 Running on http://xxx.x.x.x:5000
