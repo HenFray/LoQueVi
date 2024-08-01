@@ -1,4 +1,4 @@
-## Warning spaghetti code mode: ON
+## Warning spaghetti code mode: ON 🍜
 
 # Install requeriments
 ```bash
