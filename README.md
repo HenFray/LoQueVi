@@ -1,3 +1,5 @@
+## Warning spaghetti code mode: ON
+
 # Install requeriments
 ```bash
 pip install -r requirements.txt
