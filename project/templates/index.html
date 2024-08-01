@@ -179,7 +179,7 @@
 
         .modal input,
         .modal select {
-            width: 100%;
+            width: 20%;
             padding: 10px;
             margin: 5px 0 10px;
             border: 1px solid #ccc;
@@ -490,8 +490,7 @@
                 <option value="Flow">Flow</option>
                 <option value="Cine.ar">Cine.ar</option>
             </select>
-            <label for="comentario">Comentario:</label></br>
-            <textarea id="comentario" name="comentario" class="dark-textarea" style="width: 100%; padding: 10px; margin: 5px 0 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"></textarea></br>
+            
             <label for="puntuacion">Puntuacion:</label>
             <select id="puntuacion" name="puntuacion">
                 <option value="1/10">1/10</option>
@@ -518,6 +517,8 @@
                 <option value="2026">2026</option>
                 <option value="2027">2027</option>
             </select>
+            </br><label for="comentario">Comentario:</label></br>
+            <textarea id="comentario" name="comentario" class="dark-textarea" style="width: 100%; padding: 10px; margin: 5px 0 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"></textarea></br>
             <button id="save-button">Guardar</button>
         </div>
     </div>
@@ -526,7 +527,7 @@
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function() {
-            let darkMode = false;
+            let darkMode = true;
             const table = $('#contenido-table').DataTable({
                 ajax: {
                     url: '/get_contenido',
